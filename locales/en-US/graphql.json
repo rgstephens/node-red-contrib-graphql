@@ -1,0 +1,41 @@
+{
+    "graphql": {
+        "label": {
+            "endpoint": "Endpoint",
+            "token": "Token",
+            "syntax": "Syntax",
+            "tokenplaceholder": "Token if required by API",
+            "query": "Query",
+            "mustache": "mustache",
+            "plain": "plain",
+            "apivers": "API Vers"
+        },
+        "status": {
+            "calling": "calling",
+            "success": "success",
+            "failedConn": "Failed connection",
+            "failed": "failed",
+            "connecting": "connecting",
+            "connected": "connected",
+            "notLoggedIn": "Not logged in"
+        },
+        "errors": {
+            "tokenExp": "Token has expired or is not good, re-logging in",
+            "tokenExpLogin": "Token has expired or is not good, re-logging in",
+            "badRest": "Bad REST endpoint, not a valid call",
+            "error401": "401 error, calling close",
+            "badCreds": "Bad credentials",
+            "error404": "Bad REST endpoint, URL, resource not found",
+            "error400": "resource not found",
+            "alreadyLoggedOut": "already logged out?",
+            "server": "Server not found",
+            "timeout": "Timeout connecting to server, check port",
+            "nouserid": "No e-mail userid set",
+            "nopassword": "No e-mail password set",
+            "nocredentials": "No Email credentials found. See info panel.",
+            "nopayload": "No payload to send",            
+            "fetchfail": "Failed to fetch folder: __folder__",
+            "messageerror": "Fetch message error: __error__"
+        }
+    }
+}

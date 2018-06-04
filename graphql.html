@@ -1,0 +1,161 @@
+<script type="text/x-red" data-template-name="graphql-server">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-endpoint"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.endpoint"></span></label>
+        <input type="text" id="node-config-input-endpoint">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-token"><i class="fa fa-lock"></i> <span data-i18n="graphql.label.token"></span></label>
+        <input type="password" id="node-config-input-token" data-i18n="[placeholder]graphql.label.tokenplaceholder">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('graphql-server', {
+        category: 'config',
+        color: "rgb(218, 196, 180)",
+        defaults: {
+            endpoint: { value: "", required: true },
+            token: { value: "", required: false },
+            user: { value: "", required: false },
+            password: { value: "", required: false },
+            name: { value: "", required: false }
+        },
+        credentials: {
+            user: { type: "text" },
+            password: { type: "password" },
+            serviceTicket: { type: "password" },
+            token: { type: "password" }
+        },
+        align: 'left',
+        label: function() {
+            return this.name || this.endpoint;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="graphql">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-graphql"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.endpoint"></span></label>
+        <input type="text" id="node-input-graphql">
+    </div>
+    <div class="form-row" style="position: relative; margin-bottom: 0px;">
+        <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="graphql.label.query"></span></label>
+        <input type="hidden" id="node-input-template" autofocus="autofocus">
+        <div style="position: absolute; right:0;display:inline-block; text-align: right; font-size: 0.8em;">
+            <span data-i18n="template.label.format"></span>:
+            <select id="node-input-format" style="width:110px; font-size: 10px !important;  height: 24px; padding:0;">
+                <option value="handlebars">mustache</option>
+                <option value="html">HTML</option>
+                <option value="json">JSON</option>
+                <option value="markdown">Markdown</option>
+                <option value="text">none</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="graphql.label.syntax"></span></label>
+        <select id="node-input-syntax" style="width:180px;">
+            <option value="mustache" data-i18n="graphql.label.mustache"><span data-i18n="template.label.mustache"></span></option>
+            <option value="plain" data-i18n="graphql.label.plain"><span data-i18n="template.label.plain"></span></option>
+        </select>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    function oneditprepare() {
+        $("#node-input-collection").change(function () {
+            if($("#node-input-collection").val() === "") {
+                $("#node-warning").show();
+            } else {
+                $("#node-warning").hide();
+            }
+        });
+    }
+
+    RED.nodes.registerType('graphql', {
+        category: 'function',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value: "", required: true },
+            graphql: {type: "graphql-server", required: true },
+            format: {value:"handlebars", required: false },
+            syntax: {value:"mustache", required: false },
+            template: {value:"{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true }
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "graphql.png",
+        align: "right",
+        label: function() {
+            return this.name||"GraphQL";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            var that = this;
+            if (!this.fieldType) {
+                this.fieldType = 'msg';
+            }
+            if (!this.syntax) {
+                this.syntax = 'mustache';
+                $("#node-input-syntax").val(this.syntax);
+            }
+            $("#node-input-field").typedInput({
+                default: 'msg',
+                types: ['msg','flow','global'],
+                typeField: $("#node-input-fieldType")
+            });
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-template-editor',
+                mode: 'ace/mode/html',
+                value: $("#node-input-template").val()
+            });
+            RED.library.create({
+                url:"functions", // where to get the data from
+                type:"function", // the type of object the library is for
+                editor:that.editor, // the field name the main text body goes to
+                fields:['name','outputs']
+            });
+            this.editor.focus();
+            $("#node-input-format").change(function() {
+                var mod = "ace/mode/"+$("#node-input-format").val();
+                that.editor.getSession().setMode({
+                   path: mod,
+                   v: Date.now()
+                })
+            });
+        },
+        oneditsave: function() {
+            $("#node-input-template").val(this.editor.getValue())
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
+        }
+        });
+</script>
+
+<script type="text/x-red" data-help-name="graphql">
+    <p>This node executes a GraphQL Query or Mutation</p>
+</script>

@@ -1,0 +1,95 @@
+[
+    {
+        "id": "b236dd3d.25db5",
+        "type": "inject",
+        "z": "d1e47d94.4423f",
+        "name": "60 mins",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "3600",
+        "crontab": "",
+        "once": true,
+        "x": 104.5,
+        "y": 92,
+        "wires": [
+            [
+                "81611922.cc5f68"
+            ]
+        ]
+    },
+    {
+        "id": "149ee59b.df226a",
+        "type": "debug",
+        "z": "d1e47d94.4423f",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 810.5,
+        "y": 89,
+        "wires": []
+    },
+    {
+        "id": "3aa84960.a2c3f6",
+        "type": "graphql",
+        "z": "d1e47d94.4423f",
+        "name": "Station Details",
+        "graphql": "fbde2665.e26a18",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "{\n   stationWithStationNumber(stationNumber: {{payload}}) {\n    name\n    mailingAddress {\n      street\n      city\n      zipcode\n    }\n    federalState\n    location {\n      latitude\n      longitude\n    }\n    szentrale {\n      name\n      email\n      number\n      phoneNumber\n    }\n    hasParking\n    timetable {\n      nextDepatures {\n        type\n        trainNumber\n        platform\n        time\n        stops\n      }\n    }\n    hasWiFi\n    hasParking\n  }\n}",
+        "x": 458,
+        "y": 91,
+        "wires": [
+            [
+                "2fd3f3ce.9e20dc"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "2fd3f3ce.9e20dc",
+        "type": "template",
+        "z": "d1e47d94.4423f",
+        "name": "Station Details",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Station Details - {{payload.stationWithStationNumber.name}}\n  {{payload.stationWithStationNumber.mailingAddress.street}}\n  {{payload.stationWithStationNumber.mailingAddress.city}}\n  {{payload.stationWithStationNumber.federalState}}\nCentral Station:\n  {{payload.stationWithStationNumber.szentrale.name}}\nNext Depature:\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.type}} {{payload.stationWithStationNumber.timetable.nextDepatures.0.trainNumber}}\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.time}}\nStops:\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.stops.0}}\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.stops.1}}\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.stops.2}}\n  {{payload.stationWithStationNumber.timetable.nextDepatures.0.stops.3}}",
+        "x": 641,
+        "y": 155,
+        "wires": [
+            [
+                "149ee59b.df226a"
+            ]
+        ]
+    },
+    {
+        "id": "81611922.cc5f68",
+        "type": "template",
+        "z": "d1e47d94.4423f",
+        "name": "Berlin Ostbahnhof",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "530",
+        "x": 280,
+        "y": 158,
+        "wires": [
+            [
+                "3aa84960.a2c3f6"
+            ]
+        ]
+    },
+    {
+        "id": "fbde2665.e26a18",
+        "type": "graphql-server",
+        "z": "",
+        "endpoint": "https://developer.deutschebahn.com/free1bahnql/graphql",
+        "token": "",
+        "name": "Deutsche Bahn"
+    }
+]
