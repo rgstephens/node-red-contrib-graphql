@@ -1,0 +1,8 @@
+.idea
+*~
+.DS_Store
+.history
+icons
+node_modules
+.vscode
+temp.json

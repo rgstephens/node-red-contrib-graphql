@@ -36,6 +36,8 @@ Provides a GraphQL node to support queries and a supporting Configuration node t
 
 ## Installing and using the Example Flow
 
+This example flow uses the `node-red-contrib-graphql` node to query the Deutsche Bahn GraphQL service and get a station address and details on the next departure.
+
 The example flow is in the file `deutscheBahnFlow.json`. Import this file from the clipboad under the NodeRed menu `Import > Clipboard`.  You'll drag the example flow onto NodeRed.
 
 ![Example Flow](flow.png)
