@@ -7,7 +7,7 @@ A NodeRed node to execute GraphQL Queries.
 Run command on Node-RED installation directory.
 
 ```
-npm install node-red-graphql
+npm install node-red-contrib-graphql
 ```
 
 ## GraphQL Node
