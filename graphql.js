@@ -81,7 +81,7 @@ module.exports = function(RED) {
     this.query = config.query;
     this.template = config.template;
     this.name = config.name;
-    this.field = config.field || "payload";
+    this.varsField = config.varsField || "variables";
     this.syntax = config.syntax || "mustache";
     var node = this;
     RED.log.debug("--- GraphqlExecNode ---");
@@ -329,7 +329,7 @@ module.exports = function(RED) {
       );
     }
 
-    function callGraphQLServer(query) {
+    function callGraphQLServer(query, variables = {}) {
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
       //RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
       //RED.log.debug('callGraphQLServer, query: ' + query);
@@ -338,7 +338,8 @@ module.exports = function(RED) {
         url: node.graphqlConfig.endpoint,
         timeout: 20000,
         data: {
-          query: query
+          query: query,
+          variables: variables
         }
         // withCredentials: useCredentials
       })
@@ -402,17 +403,18 @@ module.exports = function(RED) {
       } else {
         query = node.template;
       }
+      var variables = msg[node.varsField] || {}
 
       // Do we have a serviceTicket (in other words, have we successfully logged in)
       if (!config.token) {
         // no token so we're talking to a server that doesn't require a login
-        callGraphQLServer(query);
+        callGraphQLServer(query, variables);
       } else if (!node.graphqlConfig.credentials.serviceTicket) {
         RED.log.debug("No ticket, but we have a token so try to login");
         doLogin(); // do the login
       } else {
         // we have a ticket
-        callGraphQLServer(query);
+        callGraphQLServer(query, variables);
       }
     });
 
