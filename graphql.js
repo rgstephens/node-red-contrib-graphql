@@ -329,7 +329,7 @@ module.exports = function(RED) {
       );
     }
 
-    function callGraphQLServer(query) {
+    function callGraphQLServer(query, variables = {}) {
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
       //RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
       //RED.log.debug('callGraphQLServer, query: ' + query);
