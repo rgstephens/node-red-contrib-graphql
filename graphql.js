@@ -65,14 +65,17 @@ module.exports = function(RED) {
     RED.log.debug("GraphqlNode node: " + safeJSONStringify(node));
     RED.log.trace("GraphqlNode config: " + safeJSONStringify(config));
     node.endpoint = config.endpoint;
+    node.authorization = node.credentials.authorization
     RED.log.debug("node.endpoint: " + node.endpoint);
+    RED.log.debug("node.authorization is specified")
   }
 
   RED.nodes.registerType("graphql-server", GraphqlNode, {
     credentials: {
       user: { type: "text" },
       password: { type: "password" },
-      serviceTicket: { type: "password" }
+      serviceTicket: { type: "password" },
+      authorization: { type: "password" }
     }
   });
 
@@ -330,6 +333,10 @@ module.exports = function(RED) {
     }
 
     function callGraphQLServer(query, variables = {}) {
+      let headers = {}
+      if (node.graphqlConfig.authorization) {
+        headers["Authorization"] = node.graphqlConfig.authorization
+      }
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
       //RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
       //RED.log.debug('callGraphQLServer, query: ' + query);
@@ -340,7 +347,8 @@ module.exports = function(RED) {
         data: {
           query: query,
           variables: variables
-        }
+        },
+        headers
         // withCredentials: useCredentials
       })
         .then(function(response) {

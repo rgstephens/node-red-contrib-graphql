@@ -8,7 +8,8 @@
             "query": "Query",
             "mustache": "mustache",
             "plain": "plain",
-            "apivers": "API Vers"
+            "apivers": "API Vers",
+            "authorization": "Authorization Header"
         },
         "status": {
             "calling": "calling",
