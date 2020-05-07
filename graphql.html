@@ -9,7 +9,7 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-authorization"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.authorization"></span></label>
-        <input type="password" id="node-config-input-authorization">
+        <input type="text" id="node-config-input-authorization">
     </div>
 </script>
 
@@ -18,21 +18,13 @@
         category: 'config',
         color: "rgb(218, 196, 180)",
         defaults: {
+            name: { value: "", required: false },
             endpoint: { value: "", required: true },
-            token: { value: "", required: false },
-            user: { value: "", required: false },
-            password: { value: "", required: false },
-            name: { value: "", required: false }
+            authorization: { value: "", required: false }
         },
-        credentials: {
-            user: { type: "text" },
-            password: { type: "password" },
-            serviceTicket: { type: "password" },
-            token: { type: "password" },
-            authorization: { type: "password" }
-        },
+        credentials: {},
         align: 'left',
-        label: function() {
+        label: function () {
             return this.name || this.endpoint;
         }
     });
@@ -77,7 +69,7 @@
 
     function oneditprepare() {
         $("#node-input-collection").change(function () {
-            if($("#node-input-collection").val() === "") {
+            if ($("#node-input-collection").val() === "") {
                 $("#node-warning").show();
             } else {
                 $("#node-warning").hide();
@@ -89,23 +81,23 @@
         category: 'function',
         color: '#a6bbcf',
         defaults: {
-            name: {value: "", required: true },
-            graphql: {type: "graphql-server", required: true },
-            format: {value:"handlebars", required: false },
-            syntax: {value:"mustache", required: false },
-            template: {value:"{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true }
+            name: { value: "", required: true },
+            graphql: { type: "graphql-server", required: true },
+            format: { value: "handlebars", required: false },
+            syntax: { value: "mustache", required: false },
+            template: { value: "{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true }
         },
         inputs: 1,
         outputs: 2,
         icon: "graphql.png",
         align: "right",
-        label: function() {
-            return this.name||"GraphQL";
+        label: function () {
+            return this.name || "GraphQL";
         },
-        labelStyle: function() {
+        labelStyle: function () {
             return this.name ? "node_label_italic" : "";
         },
-        oneditprepare: function() {
+        oneditprepare: function () {
             var that = this;
             if (!this.fieldType) {
                 this.fieldType = 'msg';
@@ -116,7 +108,7 @@
             }
             $("#node-input-field").typedInput({
                 default: 'msg',
-                types: ['msg','flow','global'],
+                types: ['msg', 'flow', 'global'],
                 typeField: $("#node-input-fieldType")
             });
             this.editor = RED.editor.createEditor({
@@ -125,36 +117,36 @@
                 value: $("#node-input-template").val()
             });
             RED.library.create({
-                url:"functions", // where to get the data from
-                type:"function", // the type of object the library is for
-                editor:that.editor, // the field name the main text body goes to
-                fields:['name','outputs']
+                url: "functions", // where to get the data from
+                type: "function", // the type of object the library is for
+                editor: that.editor, // the field name the main text body goes to
+                fields: ['name', 'outputs']
             });
             this.editor.focus();
-            $("#node-input-format").change(function() {
-                var mod = "ace/mode/"+$("#node-input-format").val();
+            $("#node-input-format").change(function () {
+                var mod = "ace/mode/" + $("#node-input-format").val();
                 that.editor.getSession().setMode({
-                   path: mod,
-                   v: Date.now()
+                    path: mod,
+                    v: Date.now()
                 })
             });
         },
-        oneditsave: function() {
+        oneditsave: function () {
             $("#node-input-template").val(this.editor.getValue())
             delete this.editor;
         },
-        oneditresize: function(size) {
+        oneditresize: function (size) {
             var rows = $("#dialog-form>div:not(.node-text-editor-row)");
             var height = $("#dialog-form").height();
-            for (var i=0;i<rows.size();i++) {
+            for (var i = 0; i < rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
             var editorRow = $("#dialog-form>div.node-text-editor-row");
-            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-            $(".node-text-editor").css("height",height+"px");
+            height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height", height + "px");
             this.editor.resize();
         }
-        });
+    });
 </script>
 
 <script type="text/x-red" data-help-name="graphql">
