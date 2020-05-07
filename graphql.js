@@ -3,7 +3,7 @@ module.exports = function(RED) {
   var axios = require("axios");
   var mustache = require("mustache");
 
-  var vers = "0.2.3";
+  var vers = "0.2.6";
 
   function safeJSONStringify(input, maxDepth) {
     var output,
