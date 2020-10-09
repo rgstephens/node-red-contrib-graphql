@@ -51,12 +51,12 @@ type Response {
   ok: boolean
 }
 
-input messageInput {
-  message: String
+input doSomethingInput {
+  myVar: String
 }
 
 type Mutation {
-  doSomething(input: messageInput!): Response
+  doSomething(input: doSomethingInput!): Response
 }
 
 ```
