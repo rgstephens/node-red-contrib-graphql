@@ -87,6 +87,56 @@ variables: {
 }
 ```
 
+When using a scalar type like [JSON](https://github.com/taion/graphql-type-json), the entire payload can conveniently be
+passed as an input parameter:
+
+```
+scalar JSON
+
+type Response {
+  ok: boolean
+}
+
+input payloadInput {
+  payload: JSON
+}
+
+type Mutation {
+  doSomething(input: payloadInput!): Response
+}
+
+```
+
+In node-red flow, prepare `payloadInput` variables:
+```
+msg.variables = {
+  "input": {
+    "payload": msg.payload
+  }
+}
+```
+
+which will results in
+```
+query: `mutation doSomething($input: payloadInput!) {
+  doSomething(input: $input) {
+    ok
+  }
+}`,
+variables: {
+  input: {
+    myVar: { whatever: "was in you msg.payload", val: 5, bool: true }
+  }
+}
+```
+
+The execution will return the value in:
+```
+msg.payload.doSomething
+```
+object.
+
+
 ### Outputs
 
 `payload` is loaded with the output of the Query or Mutation. If the Query is named `doSomething`, the results of the query will be in `payload.doSomething`.
