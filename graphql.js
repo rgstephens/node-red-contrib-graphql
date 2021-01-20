@@ -334,7 +334,9 @@ module.exports = function(RED) {
 
     function callGraphQLServer(query, variables = {}) {
       let headers = {}
-      if (node.graphqlConfig.authorization) {
+      if (node.msg.authorization) {
+        headers["Authorization"] = node.msg.authorization
+      } else if (node.graphqlConfig.authorization) {
         headers["Authorization"] = node.graphqlConfig.authorization
       }
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
