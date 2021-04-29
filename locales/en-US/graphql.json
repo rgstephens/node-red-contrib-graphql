@@ -9,7 +9,9 @@
             "mustache": "mustache",
             "plain": "plain",
             "apivers": "API Vers",
-            "authorization": "Authorization Header"
+            "authorization": "Authorization Header",
+            "showDebug": "Show Debug info"
+            
         },
         "status": {
             "calling": "calling",
