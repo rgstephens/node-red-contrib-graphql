@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Node-RED node to make GraphQL calls",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "mustache": "^2.3.0"
   },
   "repository": {
