@@ -75,7 +75,7 @@ module.exports = function(RED) {
       user: { type: "text" },
       password: { type: "password" },
       serviceTicket: { type: "password" },
-      authorization: { type: "password" }
+      authorization: { type: "password" },
     }
   });
 
@@ -86,6 +86,8 @@ module.exports = function(RED) {
     this.name = config.name;
     this.varsField = config.varsField || "variables";
     this.syntax = config.syntax || "mustache";
+    this.showDebug = config.showDebug || false
+    this.customHeaders = config.customHeaders || {}
     var node = this;
     RED.log.debug("--- GraphqlExecNode ---");
     //RED.log.debug('GraphqlExecNode node: ' + safeJSONStringify(node));
@@ -348,18 +350,22 @@ module.exports = function(RED) {
       return data
     }
 
-    function callGraphQLServer(query, variables = {}) {
+    function callGraphQLServer(query, variables = {}, customHeaders = {}) {
       let data = dataobject(node.context(), node.msg);
       let url = mustache.render(node.graphqlConfig.endpoint, data);
-      let headers = {};
-      if (node.graphqlConfig.authorization) {
-        headers["Authorization"] = mustache.render(node.graphqlConfig.authorization, data);
+      let headers = customHeaders
+      if (node.msg.authorization) {
+        headers["Authorization"] = node.msg.authorization
+      } else if (node.graphqlConfig.authorization) {
+        headers["Authorization"] = node.graphqlConfig.authorization
       }
       node.log(safeJSONStringify(data));
       node.log(headers.Authorization);
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
-      //RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
-      //RED.log.debug('callGraphQLServer, query: ' + query);
+      // RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
+      // RED.log.debug('callGraphQLServer, query: ' + query);
+      // RED.log.debug('callGraphQLServer, headers: ' + JSON.stringify(headers));
+      // RED.log.debug('callGraphQLServer, variables: ' + JSON.stringify(variables));
       axios({
         method: "POST",
         url,
@@ -382,7 +388,19 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
-              node.msg.payload = response.data.data;
+              node.msg.payload = response.data.data; // remove .data to see entire response
+              if (node.showDebug){
+                node.msg.debugInfo = {
+                  data: response.data,
+                  headers, 
+                  query, 
+                  variables
+                }
+              }
+              // delete node.msg.debugInfo.data.data // remove duplicate info
+              // node.msg.headers = headers
+              // node.msg.query = query
+              // node.msg.variables = variables
               node.send(node.msg);
               break;
             case response.status == 200 && !!response.data.errors:
@@ -426,8 +444,9 @@ module.exports = function(RED) {
       node.msg = msg;
       node.template = msg.template || node.template;
       node.syntax = msg.syntax || node.syntax;
+      node.customHeaders = {...node.customHeaders, ...msg.customHeaders}
       //RED.log.trace('node: ' + safeJSONStringify(node));
-      //RED.log.debug('node: ' + safeJSONStringify(node));
+      // RED.log.debug('node: ' + safeJSONStringify(node));
       //RED.log.trace('config: ' + safeJSONStringify(config));
       //RED.log.debug('config.query: ' + config.query);
       var query;
@@ -441,13 +460,13 @@ module.exports = function(RED) {
       // Do we have a serviceTicket (in other words, have we successfully logged in)
       if (!config.token) {
         // no token so we're talking to a server that doesn't require a login
-        callGraphQLServer(query, variables);
+        callGraphQLServer(query, variables, node.customHeaders);
       } else if (!node.graphqlConfig.credentials.serviceTicket) {
         RED.log.debug("No ticket, but we have a token so try to login");
         doLogin(); // do the login
       } else {
         // we have a ticket
-        callGraphQLServer(query, variables);
+        callGraphQLServer(query, variables, node.customHeaders);
       }
     });
 

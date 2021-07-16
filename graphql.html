@@ -20,7 +20,16 @@
         defaults: {
             name: { value: "", required: false },
             endpoint: { value: "", required: true },
-            authorization: { value: "", required: false }
+            token: { value: "", required: false },
+            user: { value: "", required: false },
+            password: { value: "", required: false }
+        },
+        credentials: {
+            user: { type: "text" },
+            password: { type: "password" },
+            serviceTicket: { type: "password" },
+            token: { type: "password" },
+            authorization: { type: "password" },  
         },
         credentials: {},
         align: 'left',
@@ -39,6 +48,10 @@
         <label for="node-input-graphql"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.endpoint"></span></label>
         <input type="text" id="node-input-graphql">
     </div>
+    <!-- <div class="form-row">
+        <label for="node-input-customHeaders"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.customHeaders"></span></label>
+        <input type="json" id="node-input-customHeaders">
+    </div> -->
     <div class="form-row" style="position: relative; margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="graphql.label.query"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
@@ -63,6 +76,10 @@
             <option value="plain" data-i18n="graphql.label.plain"><span data-i18n="template.label.plain"></span></option>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-showDebug"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.showDebug"></span></label>
+        <input type="checkbox" id="node-input-showDebug">
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -86,6 +103,8 @@
             format: { value: "handlebars", required: false },
             syntax: { value: "mustache", required: false },
             template: { value: "{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true }
+            showDebug: {value: false, required: false}
+            // customHeaders:{value:"{}", required: false}
         },
         inputs: 1,
         outputs: 2,
@@ -111,6 +130,18 @@
                 types: ['msg', 'flow', 'global'],
                 typeField: $("#node-input-fieldType")
             });
+            if (!this.showDebug) {
+                // this.showDebug = false;
+                $("#node-input-showDebug").val(this.showDebug);
+            }
+
+            // $("#node-input-customHeaders").typedInput({
+            //     default: 'json',
+            //     typeField: $("#node-input-customHeaders"),
+            //     label: "msg.customHeaders",
+            //     type:"json",
+            //     types:["json"]
+            // })
             this.editor = RED.editor.createEditor({
                 id: 'node-input-template-editor',
                 mode: 'ace/mode/html',
@@ -134,6 +165,7 @@
         oneditsave: function () {
             $("#node-input-template").val(this.editor.getValue())
             delete this.editor;
+            $("#node-input-showDebug").val(this.showDebug.getValue())
         },
         oneditresize: function (size) {
             var rows = $("#dialog-form>div:not(.node-text-editor-row)");
@@ -151,4 +183,6 @@
 
 <script type="text/x-red" data-help-name="graphql">
     <p>This node executes a GraphQL Query or Mutation</p>
+    <p>Optionally receives msg.customHeaders to dynamically send headers as needed</p>
+    <p>Outputs msg.debugInfo if the options is checked</p>
 </script>
