@@ -14,6 +14,7 @@
         "status": {
             "calling": "calling",
             "success": "success",
+            "gqlError": "graphql error",
             "failedConn": "Failed connection",
             "failed": "failed",
             "connecting": "connecting",
@@ -34,7 +35,7 @@
             "nouserid": "No e-mail userid set",
             "nopassword": "No e-mail password set",
             "nocredentials": "No Email credentials found. See info panel.",
-            "nopayload": "No payload to send",            
+            "nopayload": "No payload to send",
             "fetchfail": "Failed to fetch folder: __folder__",
             "messageerror": "Fetch message error: __error__"
         }
