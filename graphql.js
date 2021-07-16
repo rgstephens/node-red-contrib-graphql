@@ -3,7 +3,7 @@ module.exports = function(RED) {
   var axios = require("axios");
   var mustache = require("mustache");
 
-  var vers = "0.2.3";
+  var vers = "0.2.6";
 
   function safeJSONStringify(input, maxDepth) {
     var output,
@@ -65,7 +65,7 @@ module.exports = function(RED) {
     RED.log.debug("GraphqlNode node: " + safeJSONStringify(node));
     RED.log.trace("GraphqlNode config: " + safeJSONStringify(config));
     node.endpoint = config.endpoint;
-    node.authorization = node.credentials.authorization
+    node.authorization = config.authorization
     RED.log.debug("node.endpoint: " + node.endpoint);
     RED.log.debug("node.authorization is specified")
   }
@@ -334,14 +334,33 @@ module.exports = function(RED) {
       );
     }
 
+    function dataobject(context, msg){
+      data = {}
+      data.msg = msg;
+      data.global = {};
+      data.flow = {};
+      g_keys = context.global.keys();
+      f_keys = context.flow.keys();
+      for (k in g_keys){
+        data.global[g_keys[k]] = context.global.get(g_keys[k]);
+      };
+      for (k in f_keys){
+        data.flow[f_keys[k]] = context.flow.get(f_keys[k]);
+      };
+      return data
+    }
+
     function callGraphQLServer(query, variables = {}, customHeaders = {}) {
+      let data = dataobject(node.context(), node.msg);
+      let url = mustache.render(node.graphqlConfig.endpoint, data);
       let headers = customHeaders
-      // if (node.msg.customHeaders) headers = {...customHeaders, ...node.msg.customHeaders}
       if (node.msg.authorization) {
         headers["Authorization"] = node.msg.authorization
       } else if (node.graphqlConfig.authorization) {
         headers["Authorization"] = node.graphqlConfig.authorization
       }
+      node.log(safeJSONStringify(data));
+      node.log(headers.Authorization);
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
       // RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
       // RED.log.debug('callGraphQLServer, query: ' + query);
@@ -349,21 +368,21 @@ module.exports = function(RED) {
       // RED.log.debug('callGraphQLServer, variables: ' + JSON.stringify(variables));
       axios({
         method: "POST",
-        url: node.graphqlConfig.endpoint,
+        url,
+        headers,
         timeout: 20000,
         data: {
           query: query,
           variables: variables
-        },
-        headers
+        }
         // withCredentials: useCredentials
       })
         .then(function(response) {
           //RED.log.debug('response:' + safeJSONStringify(response, 1));
           //RED.log.debug('response.data:' + safeJSONStringify(response.data));
           //RED.log.debug('response.status:' + response.status);
-          switch (response.status) {
-            case 200:
+          switch (true) {
+            case response.status == 200 && !response.data.errors:
               node.status({
                 fill: "green",
                 shape: "dot",
@@ -384,6 +403,15 @@ module.exports = function(RED) {
               // node.msg.variables = variables
               node.send(node.msg);
               break;
+            case response.status == 200 && !!response.data.errors:
+              node.status({
+                fill: "yellow",
+                shape: "dot",
+                text: RED._("graphql.status.gqlError")
+              });
+              node.msg.payload = response.data.errors;
+              node.send([null, node.msg]);
+              break;
             default:
               node.status({
                 fill: "red",
@@ -391,13 +419,9 @@ module.exports = function(RED) {
                 text: "status: " + response.status
               });
               node.msg.payload = {
-                statusCode: response.statusCode,
-                body: response.body
+                statusCode: response.status,
+                body: response.data
               };
-              node.error(
-                "401 error, msg: " + safeJSONStringify(node.msg),
-                node.msg
-              );
               node.send([null, node.msg]);
               break;
           }
