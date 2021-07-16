@@ -1,5 +1,9 @@
 # node-red-contrib-graphql
 
+[![Platform](https://img.shields.io/badge/platform-Node--RED-red)](https://nodered.org)
+![Release](https://img.shields.io/npm/v/node-red-contrib-graphql.svg)
+![NPM](https://img.shields.io/npm/dm/node-red-contrib-graphql.svg)
+
 A NodeRed node to execute GraphQL Queries.
 
 ## Install
@@ -10,16 +14,24 @@ Run command on Node-RED installation directory.
 npm install node-red-contrib-graphql
 ```
 
+## Change Log
+
+| Vers  | Changes                                                                                                                                                                                                     |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1.0 | [Error Handling & Config Templates](https://github.com/rgstephens/node-red-contrib-graphql/pull/11/), [showDebug & customHeaders](https://github.com/rgstephens/node-red-contrib-graphql/pull/22/conflicts) |
+| 1.0.1 | [Bump axios](https://github.com/rgstephens/node-red-contrib-graphql/pull/20)                                                                                                                                |
+| 1.0.0 | pass Authorization via msg.authorization, [PR #21](https://github.com/rgstephens/node-red-contrib-graphql/pull/21)                                                                                          |
+
 ## GraphQL Node
 
 Provides a GraphQL node to support queries and a supporting Configuration node to point to a GraphQL server.
 
 ### Node Fields
 
-| Name | Use |
-|---|---|
-| GraphQL Endpoint | URL to the endpoint |
-| Query | Query or Mutation template |
+| Name             | Use                        |
+| ---------------- | -------------------------- |
+| GraphQL Endpoint | URL to the endpoint        |
+| Query            | Query or Mutation template |
 
 
 ### Template flavors and uses
