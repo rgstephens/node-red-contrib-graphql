@@ -18,7 +18,8 @@ npm install node-red-contrib-graphql
 
 | Vers  | Changes                                                                                                                                                                                                     |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.2.0 | [Fix node not showing in palette](https://github.com/rgstephens/node-red-contrib-graphql/pull/24), bump axios |
+| 1.3.0 | bump axios to address CVE-2021-3749                                                                                                                                                                         |
+| 1.2.0 | [Fix node not showing in palette](https://github.com/rgstephens/node-red-contrib-graphql/pull/24), bump axios                                                                                               |
 | 1.1.0 | [Error Handling & Config Templates](https://github.com/rgstephens/node-red-contrib-graphql/pull/11/), [showDebug & customHeaders](https://github.com/rgstephens/node-red-contrib-graphql/pull/22/conflicts) |
 | 1.0.1 | [Bump axios](https://github.com/rgstephens/node-red-contrib-graphql/pull/20)                                                                                                                                |
 | 1.0.0 | pass Authorization via msg.authorization, [PR #21](https://github.com/rgstephens/node-red-contrib-graphql/pull/21)                                                                                          |
