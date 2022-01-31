@@ -3,7 +3,7 @@ module.exports = function(RED) {
   var axios = require("axios");
   var mustache = require("mustache");
 
-  var vers = "1.4.0";
+  var vers = "1.4.1";
 
   function isReadable(value) {
     return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
