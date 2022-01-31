@@ -5,6 +5,10 @@ module.exports = function(RED) {
 
   var vers = "0.2.6";
 
+  function isReadable(value) {
+    return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
+  }
+
   function safeJSONStringify(input, maxDepth) {
     var output,
       refs = [],
@@ -29,6 +33,10 @@ module.exports = function(RED) {
         pPath = (path ? path + "." : "") + p;
         if (typeof input[p] === "function") {
           output[p] = "{function}";
+        } else if (input[p] && Buffer.isBuffer(input[p])) {
+          output[p] = "[object Buffer]";
+        } else if (input[p] && isReadable(input[p])) {
+          output[p] = "[object Readable]";
         } else if (typeof input[p] === "object") {
           refIdx = refs.indexOf(input[p]);
 
@@ -359,8 +367,12 @@ module.exports = function(RED) {
       } else if (node.graphqlConfig.authorization) {
         headers["Authorization"] = node.graphqlConfig.authorization
       }
-      node.log(safeJSONStringify(data));
-      node.log(headers.Authorization);
+
+      if (node.showDebug) {
+        node.log(safeJSONStringify(data));
+        node.log(headers.Authorization);
+      }
+
       //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
       // RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
       // RED.log.debug('callGraphQLServer, query: ' + query);
@@ -392,8 +404,8 @@ module.exports = function(RED) {
               if (node.showDebug){
                 node.msg.debugInfo = {
                   data: response.data,
-                  headers, 
-                  query, 
+                  headers,
+                  query,
                   variables
                 }
               }
