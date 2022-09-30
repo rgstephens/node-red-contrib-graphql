@@ -182,7 +182,7 @@ module.exports = function(RED) {
                   switch (response.body.response.errorCode) {
                     case "RBAC": // token not recognized
                       errorMsg = RED._("graphql.errors.tokenExpLogin");
-                      node.msg.payload = {
+                      node.msg.payload.graphql = {
                         statusCode: response.statusCode,
                         errorCode: response.body.response.errorCode,
                         message: errorMsg,
@@ -199,7 +199,7 @@ module.exports = function(RED) {
                         shape: "dot",
                         text: errorMsg
                       });
-                      node.msg.payload = {
+                      node.msg.payload.graphql = {
                         statusCode: response.statusCode,
                         errorCode: response.body.response.errorCode,
                         message: errorMsg,
@@ -218,7 +218,7 @@ module.exports = function(RED) {
                         shape: "dot",
                         text: errorMsg
                       });
-                      node.msg.payload = {
+                      node.msg.payload.graphql = {
                         statusCode: response.statusCode,
                         errorCode: response.body.response.errorCode,
                         message: errorMsg,
@@ -229,7 +229,7 @@ module.exports = function(RED) {
                   }
                 } else {
                   node.status({ fill: "red", shape: "dot", text: errorMsg });
-                  node.msg.payload = {
+                  node.msg.payload.graphql = {
                     statusCode: response.statusCode,
                     message: errorMsg
                   };
@@ -242,16 +242,16 @@ module.exports = function(RED) {
               case 403: // bad url, api version number
                 errorMsg = RED._("graphql.errors.badRest");
                 node.status({ fill: "red", shape: "dot", text: errorMsg });
-                //                                node.msg.payload = response;
+                //                                node.msg.payload.graphql = response;
                 node.warn("msg: " + safeJSONStringify(node.msg));
-                //node.msg.payload = response;
-                //delete node.msg.payload.body;
-                //delete node.msg.payload.headers;
+                //node.msg.payload.graphql = response;
+                //delete node.msg.payload.graphql.body;
+                //delete node.msg.payload.graphql.headers;
                 //node.msg.response = {};
                 //node.msg.response = response;
                 //node.msg.response = { statusCode: 403 };
                 RED.log.debug("response: " + safeJSONStringify(response));
-                node.msg.payload = {
+                node.msg.payload.graphql = {
                   statusCode: response.statusCode,
                   message: errorMsg
                 };
@@ -268,7 +268,7 @@ module.exports = function(RED) {
                 if (response.body.response.message) {
                   longMsg += ", " + response.body.response.message;
                 }
-                node.msg.payload = {
+                node.msg.payload.graphql = {
                   statusCode: response.statusCode,
                   errorCode: response.body.response.errorCode,
                   message: longMsg
@@ -312,7 +312,7 @@ module.exports = function(RED) {
                     });
                   }
                 } // if response
-                node.msg.payload = response;
+                node.msg.payload.graphql = response;
               //node.error('default error, msg: ' + safeJSONStringify(node.msg), node.msg);
             } // switch
           } else {
@@ -400,7 +400,7 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
-              node.msg.payload = response.data.data; // remove .data to see entire response
+              node.msg.payload.graphql = response.data.data; // remove .data to see entire response
               if (node.showDebug){
                 node.msg.debugInfo = {
                   data: response.data,
@@ -421,7 +421,7 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.gqlError")
               });
-              node.msg.payload = response.data.errors;
+              node.msg.payload.graphql = response.data.errors;
               node.send([null, node.msg]);
               break;
             default:
@@ -430,7 +430,7 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: "status: " + response.status
               });
-              node.msg.payload = {
+              node.msg.payload.graphql = {
                 statusCode: response.status,
                 body: response.data
               };
@@ -441,7 +441,7 @@ module.exports = function(RED) {
         .catch(function(error) {
           RED.log.debug("error:" + error);
           node.status({ fill: "red", shape: "dot", text: "error" });
-          node.msg.payload = { error };
+          node.msg.payload.graphql = { error };
           node.error("error: " + error);
           node.send([null, node.msg]);
         });
