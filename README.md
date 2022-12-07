@@ -18,6 +18,7 @@ npm install node-red-contrib-graphql
 
 | Vers  | Changes                                                                                                                                                                                                                                                                                    | Date        |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| 2.0.0 | GraphQL response is now on `payload.graphql` instead of replacing `payload`. This is a breaking change. Addresses #32 | Dec 7 2022 |
 | 1.4.1 | Bump `follow-redirects` to 1.14.8 | Dec 7 2022 |
 | 1.4.0 | improve debug, bump `follow-redirects`                                                                                                                                                                                                                                                     | Jan 30 2022 |
 | 1.3.0 | bump axios to address CVE-2021-3749                                                                                                                                                                                                                                                        | Oct 27 2021 |
@@ -60,7 +61,7 @@ If you select plain, the template is left as it is.
 You can add GraphQL query variables to the submitted query by defining them in the `msg.variables` property.
 Your variables will be passed over to the GraphQL query.
 
-For exemple, if you define
+For example, if you define
 
 ```
 type Response {
