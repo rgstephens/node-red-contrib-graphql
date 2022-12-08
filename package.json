@@ -3,8 +3,8 @@
   "version": "2.0.0",
   "description": "A Node-RED node to make GraphQL calls",
   "dependencies": {
-    "axios": ">=0.21.2",
-    "mustache": "^2.3.0"
+    "axios": "^1.x",
+    "mustache": "^4.x"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,11 @@
   "node-red": {
     "nodes": {
       "graphql": "graphql.js"
-    }
+    },
+    "version": ">=2.0.0",
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "author": {
     "name": "Greg Stephens",
