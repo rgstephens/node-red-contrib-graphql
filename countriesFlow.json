@@ -1,0 +1,75 @@
+[
+    {
+        "id": "1e17ed022fe46927",
+        "type": "graphql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Get Country",
+        "graphql": "5ec8b7409ad68ba9",
+        "format": "text",
+        "syntax": "mustache",
+        "template": "{\n  country(code: \"DE\") {\n    name\n    native\n    capital\n    currency\n    phone\n    states {\n      code\n      name\n    }\n  }\n}",
+        "showDebug": false,
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "958145d662bfb358"
+            ],
+            [
+                "958145d662bfb358"
+            ]
+        ]
+    },
+    {
+        "id": "6abfe2bcebf7964c",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "1e17ed022fe46927"
+            ]
+        ]
+    },
+    {
+        "id": "958145d662bfb358",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 530,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "5ec8b7409ad68ba9",
+        "type": "graphql-server",
+        "name": "Countries",
+        "endpoint": "https://countries.trevorblades.com"
+    }
+]
