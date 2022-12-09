@@ -3,7 +3,7 @@ module.exports = function(RED) {
   var axios = require("axios");
   var mustache = require("mustache");
 
-  var vers = "2.0.0";
+  var vers = "2.0.1";
 
   function isReadable(value) {
     return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
@@ -75,7 +75,7 @@ module.exports = function(RED) {
     node.endpoint = config.endpoint;
     node.authorization = config.authorization
     RED.log.debug("node.endpoint: " + node.endpoint);
-    RED.log.debug("node.authorization is specified")
+    RED.log.debug("node.authorization: " + node.authorization)
   }
 
   RED.nodes.registerType("graphql-server", GraphqlNode, {
@@ -400,6 +400,7 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
+              node.msg.payload = {}
               node.msg.payload.graphql = response.data.data; // remove .data to see entire response
               if (node.showDebug){
                 node.msg.debugInfo = {
