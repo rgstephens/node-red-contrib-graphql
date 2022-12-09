@@ -16,16 +16,17 @@ npm install node-red-contrib-graphql
 
 ## Change Log
 
-| Vers  | Changes                                                                                                                                                                                                                                                                                   | Date          |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -----------   |
-| 2.0.0 | GraphQL response is now on `payload.graphql` instead of replacing `payload`. This is a breaking change. Addresses #32                                                                                                                                                                     | 7 Dec 2022  |
-| 1.4.1 | Bump `follow-redirects` to 1.14.8                                                                                                                                                                                                                                                         | 7 Dec 2022  |
-| 1.4.0 | improve debug, bump `follow-redirects`                                                                                                                                                                                                                                                    | 30 Jan 2022 |
-| 1.3.0 | bump axios to address CVE-2021-3749                                                                                                                                                                                                                                                       | 27 Oct 2021 |
-| 1.2.0 | [Fix node not showing in palette](https://github.com/rgstephens/node-red-contrib-graphql/pull/24), bump axios                                                                                                                                                                             | 14 Sep 2021 |
-| 1.1.0 | [Error Handling & Config Templates](https://github.com/rgstephens/node-red-contrib-graphql/pull/11/), [showDebug & customHeaders](https://github.com/rgstephens/node-red-contrib-graphql/pull/22/conflicts), [Bump axios](https://github.com/rgstephens/node-red-contrib-graphql/pull/20) | 15 Jul 2021 |
-| 1.0.0 | pass Authorization via msg.authorization, [PR #21](https://github.com/rgstephens/node-red-contrib-graphql/pull/21)                                                                                                                                                                        | 15 Jul 2021 |
-| 0.0.6 | Initial Release                                                                                                                                                                                                                                                                           | 4 Jun 2018  |
+| Vers  | Changes                                                                                                                                                                                                                                                                                   |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.0.1 | Update dependencies (`axios` & `mustache`), fix node-red scorecard issues |
+| 2.0.0 | GraphQL response is now on `payload.graphql` instead of replacing `payload`. This is a breaking change. Addresses #32                                                                                                                                                                     |
+| 1.4.1 | Bump `follow-redirects` to 1.14.8                                                                                                                                                                                                                                                         |
+| 1.4.0 | improve debug, bump `follow-redirects`                                                                                                                                                                                                                                                    |
+| 1.3.0 | bump axios to address CVE-2021-3749                                                                                                                                                                                                                                                       |
+| 1.2.0 | [Fix node not showing in palette](https://github.com/rgstephens/node-red-contrib-graphql/pull/24), bump axios                                                                                                                                                                             |
+| 1.1.0 | [Error Handling & Config Templates](https://github.com/rgstephens/node-red-contrib-graphql/pull/11/), [showDebug & customHeaders](https://github.com/rgstephens/node-red-contrib-graphql/pull/22/conflicts), [Bump axios](https://github.com/rgstephens/node-red-contrib-graphql/pull/20) |
+| 1.0.0 | pass Authorization via msg.authorization, [PR #21](https://github.com/rgstephens/node-red-contrib-graphql/pull/21)                                                                                                                                                                        |
+| 0.0.6 | Initial Release                                                                                                                                                                                                                                                                           |
 
 ## GraphQL Nodes
 
@@ -65,7 +66,7 @@ This is the result sent to the debug window.
 
 Here is the example using the [Countries API](https://github.com/trevorblades/countries) built by GitHub user [Trevor Blades](https://github.com/trevorblades), who used [Countries List](https://annexare.github.io/Countries/) as a source of data.
 
-The GraphQL endpoint for this API is `https://countries.trevorblades.com/`
+The GraphQL endpoint for this API is `https://countries.trevorblades.com/`.  You can try it out [here](https://countries.trevorblades.com/).
 
 ```json
 # Get information on Germany and it's states
