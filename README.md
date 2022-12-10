@@ -3,16 +3,9 @@
 [![Platform](https://img.shields.io/badge/platform-Node--RED-red)](https://nodered.org)
 ![Release](https://img.shields.io/npm/v/node-red-contrib-graphql.svg)
 ![NPM](https://img.shields.io/npm/dm/node-red-contrib-graphql.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6cbeb40ab5604b3ab99e6badc9469e8a)](https://www.codacy.com/gh/rgstephens/node-red-contrib-graphql?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rgstephens/node-red-contrib-graphql&amp;utm_campaign=Badge_Grade)
 
 A NodeRed node to execute GraphQL Queries.
-
-## Install
-
-Run command on Node-RED installation directory.
-
-```
-npm install node-red-contrib-graphql
-```
 
 ## Change Log
 
@@ -31,7 +24,7 @@ npm install node-red-contrib-graphql
 
 ## GraphQL Nodes
 
-Provides a `GraphQL` node to support queries and a supporting Configuration node, called `graphql-server` to point to a GraphQL server.
+Provides a `GraphQL` node to support queries and a configuration node called `graphql-server`.
 
 ### `graphql-server` Configuration Node Fields
 
