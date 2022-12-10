@@ -1,0 +1,95 @@
+[
+    {
+        "id": "cc97ba59b7f7b1c6",
+        "type": "inject",
+        "z": "ecee231023f6944e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "5ce1d5e8c233c062"
+            ]
+        ]
+    },
+    {
+        "id": "5ce1d5e8c233c062",
+        "type": "graphql",
+        "z": "ecee231023f6944e",
+        "name": "Get Login id",
+        "graphql": "4a27e34566452125",
+        "format": "handlebars",
+        "template": "{\n  viewer {\n    login\n  }\n}",
+        "syntax": "mustache",
+        "token": "",
+        "showDebug": false,
+        "credentials": {},
+        "x": 350,
+        "y": 140,
+        "wires": [
+            [
+                "fe44bcf58ee82812"
+            ],
+            [
+                "35a20afebf41f631"
+            ]
+        ]
+    },
+    {
+        "id": "fe44bcf58ee82812",
+        "type": "debug",
+        "z": "ecee231023f6944e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.graphql.viewer.login",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "35a20afebf41f631",
+        "type": "debug",
+        "z": "ecee231023f6944e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "4a27e34566452125",
+        "type": "graphql-server",
+        "name": "GitHub",
+        "endpoint": "https://api.github.com/graphql",
+        "token": ""
+    }
+]
