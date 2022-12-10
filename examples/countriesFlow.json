@@ -1,1 +1,110 @@
-[{"id":"a12eeec2ef7081f3","type":"graphql","z":"e596e2e15cffe546","name":"Get Country","graphql":"5ec8b7409ad68ba9","format":"json","syntax":"mustache","template":"{\n  country(code: \"DE\") {\n    name\n    native\n    capital\n    currency\n    phone\n    states {\n      code\n      name\n    }\n  }\n}","showDebug":false,"x":290,"y":80,"wires":[["b1909e0fe42ed002","b4a00ddbf587d5db"],["b4a00ddbf587d5db"]]},{"id":"8ce305107f24099c","type":"inject","z":"e596e2e15cffe546","name":"","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"","crontab":"","once":false,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":100,"y":80,"wires":[["a12eeec2ef7081f3"]]},{"id":"b4a00ddbf587d5db","type":"debug","z":"e596e2e15cffe546","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","statusVal":"","statusType":"auto","x":490,"y":100,"wires":[]},{"id":"b1909e0fe42ed002","type":"template","z":"e596e2e15cffe546","name":"Country Details","field":"payload","fieldType":"msg","format":"handlebars","syntax":"mustache","template":"Country Name - {{payload.graphql.country.name}} / {{payload.country.native}}\nCapital: {{payload.graphql.country.capital}}\nCurrency: {{payload.graphql.country.currency}}\nStates:\n  {{payload.graphql.country.states.0.name}}\n  {{payload.graphql.country.states.1.name}}\n  {{payload.graphql.country.states.2.name}}\n  {{payload.graphql.country.states.3.name}}\n","output":"str","x":520,"y":60,"wires":[["080fbc2ad4668f85"]]},{"id":"080fbc2ad4668f85","type":"debug","z":"e596e2e15cffe546","name":"","active":true,"tosidebar":true,"console":false,"complete":"false","statusVal":"","statusType":"auto","x":730,"y":60,"wires":[]},{"id":"5ec8b7409ad68ba9","type":"graphql-server","name":"Countries","endpoint":"https://countries.trevorblades.com"}]
+[
+    {
+        "id": "a12eeec2ef7081f3",
+        "type": "graphql",
+        "z": "e596e2e15cffe546",
+        "name": "Get Country",
+        "graphql": "5ec8b7409ad68ba9",
+        "format": "json",
+        "syntax": "mustache",
+        "template": "{\n  country(code: \"DE\") {\n    name\n    native\n    capital\n    currency\n    phone\n    states {\n      code\n      name\n    }\n  }\n}",
+        "showDebug": false,
+        "x": 290,
+        "y": 80,
+        "wires": [
+            [
+                "b1909e0fe42ed002",
+                "b4a00ddbf587d5db"
+            ],
+            [
+                "b4a00ddbf587d5db"
+            ]
+        ]
+    },
+    {
+        "id": "8ce305107f24099c",
+        "type": "inject",
+        "z": "e596e2e15cffe546",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 80,
+        "wires": [
+            [
+                "a12eeec2ef7081f3"
+            ]
+        ]
+    },
+    {
+        "id": "b4a00ddbf587d5db",
+        "type": "debug",
+        "z": "e596e2e15cffe546",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 490,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b1909e0fe42ed002",
+        "type": "template",
+        "z": "e596e2e15cffe546",
+        "name": "Country Details",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Country Name - {{payload.graphql.country.name}} / {{payload.graphql.country.native}}\nCapital: {{payload.graphql.country.capital}}\nCurrency: {{payload.graphql.country.currency}}\nStates:\n  {{payload.graphql.country.states.0.name}}\n  {{payload.graphql.country.states.1.name}}\n  {{payload.graphql.country.states.2.name}}\n  {{payload.graphql.country.states.3.name}}\n",
+        "output": "str",
+        "x": 520,
+        "y": 60,
+        "wires": [
+            [
+                "080fbc2ad4668f85"
+            ]
+        ]
+    },
+    {
+        "id": "080fbc2ad4668f85",
+        "type": "debug",
+        "z": "e596e2e15cffe546",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "5ec8b7409ad68ba9",
+        "type": "graphql-server",
+        "name": "Countries",
+        "endpoint": "https://countries.trevorblades.com"
+    }
+]

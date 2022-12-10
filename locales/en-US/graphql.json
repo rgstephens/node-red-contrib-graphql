@@ -2,16 +2,14 @@
     "graphql": {
         "label": {
             "endpoint": "Endpoint",
-            "token": "Token",
             "syntax": "Syntax",
             "tokenplaceholder": "Token if required by API",
             "query": "Query",
             "mustache": "mustache",
             "plain": "plain",
             "apivers": "API Vers",
-            "authorization": "Authorization Header",
-            "showDebug": "Show Debug info"
-            
+            "token": "Bearer Token",
+            "showDebug": "Show Debug"
         },
         "status": {
             "calling": "calling",

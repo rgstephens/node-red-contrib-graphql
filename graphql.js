@@ -3,7 +3,7 @@ module.exports = function(RED) {
   var axios = require("axios");
   var mustache = require("mustache");
 
-  var vers = "2.0.1";
+  var vers = "2.1.0";
 
   function isReadable(value) {
     return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
@@ -68,278 +68,39 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    //node.status({ fill:"blue", shape:"ring", text:"connecting" });
     RED.log.debug("--- GraphqlNode v" + vers + " ---");
     RED.log.debug("GraphqlNode node: " + safeJSONStringify(node));
     RED.log.trace("GraphqlNode config: " + safeJSONStringify(config));
     node.endpoint = config.endpoint;
-    node.authorization = config.authorization
+    node.token = config.token
     RED.log.debug("node.endpoint: " + node.endpoint);
-    RED.log.debug("node.authorization: " + node.authorization)
+    RED.log.debug("node.token: " + node.token)
   }
 
   RED.nodes.registerType("graphql-server", GraphqlNode, {
     credentials: {
-      user: { type: "text" },
-      password: { type: "password" },
-      serviceTicket: { type: "password" },
-      authorization: { type: "password" },
+      token: { type: "password" },
     }
   });
 
   function GraphqlExecNode(config) {
     RED.nodes.createNode(this, config);
-    this.query = config.query;
-    this.template = config.template;
-    this.name = config.name;
-    this.varsField = config.varsField || "variables";
-    this.syntax = config.syntax || "mustache";
-    this.showDebug = config.showDebug || false
-    this.customHeaders = config.customHeaders || {}
     var node = this;
-    RED.log.debug("--- GraphqlExecNode ---");
-    //RED.log.debug('GraphqlExecNode node: ' + safeJSONStringify(node));
-    //RED.log.trace('GraphqlExecNode config: ' + safeJSONStringify(config));
 
-    // Retrieve the config node
-    node.graphqlConfig = RED.nodes.getNode(config.graphql);
-    var credentials = RED.nodes.getCredentials(config.graphql);
-    RED.log.trace("credentials: " + safeJSONStringify(credentials));
+    node.graphqlConfig = RED.nodes.getNode(config.graphql);  // Retrieve the config node
+
+    node.template = config.template;
+    node.name = config.name;
+    node.varsField = config.varsField || "variables";
+    node.syntax = config.syntax || "mustache";
+    node.showDebug = config.showDebug || false
+    node.token = node.credentials.token || "";
+    node.customHeaders = config.customHeaders || {}
+    node.varsField = config.varsField || "variables";
+    RED.log.debug("--- GraphqlExecNode ---");
 
     if (!node.graphqlConfig) {
-      this.error("invalid graphql config");
-    }
-
-    // This function returns true if you have a valid Ticket, false if you don't
-    function testTicket() {
-      // GET /user/{username}
-      RED.log.debug("--- test ticket ---");
-      axios({
-        method: "POST",
-        url:
-          node.graphqlConfig.endpoint +
-          "user/" +
-          node.graphqlConfig.credentials.user,
-        timeout: 20000,
-        headers: {
-          "x-auth-token": node.graphqlConfig.credentials.serviceTicket
-        }
-        // withCredentials: useCredentials
-      }).then(function(response) {
-        RED.log.debug("response:" + response);
-      });
-    }
-
-    function doLogin() {
-      node.status({
-        fill: "blue",
-        shape: "ring",
-        text: RED._("graphql.status.connecting")
-      });
-      RED.log.debug("--- Login (accept unauthorized) ---");
-      request(
-        {
-          url: node.graphqlConfig.endpoint,
-          method: "POST",
-          json: true,
-          timeout: 20000
-        },
-        function(error, response, body) {
-          if (response) {
-            switch (response.statusCode) {
-              case 200:
-                node.status({
-                  fill: "green",
-                  shape: "dot",
-                  text: RED._("graphql.status.connected")
-                });
-                RED.log.debug("statusCode: " + response.statusCode);
-                RED.log.debug("response: " + safeJSONStringify(response));
-                RED.log.debug("body: " + safeJSONStringify(body));
-                RED.log.debug("serviceTicket: " + body.response.serviceTicket);
-                node.graphqlConfig.credentials.serviceTicket =
-                  body.response.serviceTicket; // store service ticket
-                RED.log.debug(
-                  "updated credentials (2): " +
-                    safeJSONStringify(node.graphqlConfig.credentials)
-                );
-                RED.nodes.addCredentials(
-                  node.graphqlConfig,
-                  node.graphqlConfig.credentials
-                );
-                RED.log.debug("body: " + safeJSONStringify(body));
-                RED.log.debug("node.msg: " + safeJSONStringify(node.msg));
-                node.warn("Calling send with msg: " + safeJSONStringify(node.msg));
-                node.send([node.msg]);
-                break;
-              case 401: // token issues
-                RED.log.debug("401 response: " + safeJSONStringify(response));
-                if (response.body.response.errorCode) {
-                  RED.log.debug(
-                    "401 response.body.response.errorCode: " +
-                      response.body.response.errorCode
-                  );
-                  switch (response.body.response.errorCode) {
-                    case "RBAC": // token not recognized
-                      errorMsg = RED._("graphql.errors.tokenExpLogin");
-                      node.msg.payload.graphql = {
-                        statusCode: response.statusCode,
-                        errorCode: response.body.response.errorCode,
-                        message: errorMsg,
-                        detail: response.body.response.detail
-                      };
-                      node.error(errorMsg, node.msg);
-                      node.close();
-                      break;
-                    case "INVALID_CREDENTIALS": // token not recognized
-                      errorMsg = RED._("graphql.errors.badCreds");
-                      //errorMsg = body.response.message;
-                      node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: errorMsg
-                      });
-                      node.msg.payload.graphql = {
-                        statusCode: response.statusCode,
-                        errorCode: response.body.response.errorCode,
-                        message: errorMsg,
-                        detail: response.body.response.detail
-                      };
-                      node.error(errorMsg, node.msg);
-                      break;
-                    default:
-                      // other issue
-                      errorMsg =
-                        RED._("graphql.errors.error401") +
-                        " " +
-                        response.body.message;
-                      node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: errorMsg
-                      });
-                      node.msg.payload.graphql = {
-                        statusCode: response.statusCode,
-                        errorCode: response.body.response.errorCode,
-                        message: errorMsg,
-                        detail: response.body.response.detail
-                      };
-                      node.error(errorMsg, node.msg);
-                      node.close();
-                  }
-                } else {
-                  node.status({ fill: "red", shape: "dot", text: errorMsg });
-                  node.msg.payload.graphql = {
-                    statusCode: response.statusCode,
-                    message: errorMsg
-                  };
-                  node.error(
-                    "401 error, response: " + safeJSONStringify(response),
-                    node.msg
-                  );
-                }
-                break;
-              case 403: // bad url, api version number
-                errorMsg = RED._("graphql.errors.badRest");
-                node.status({ fill: "red", shape: "dot", text: errorMsg });
-                //                                node.msg.payload.graphql = response;
-                node.warn("msg: " + safeJSONStringify(node.msg));
-                //node.msg.payload.graphql = response;
-                //delete node.msg.payload.graphql.body;
-                //delete node.msg.payload.graphql.headers;
-                //node.msg.response = {};
-                //node.msg.response = response;
-                //node.msg.response = { statusCode: 403 };
-                RED.log.debug("response: " + safeJSONStringify(response));
-                node.msg.payload.graphql = {
-                  statusCode: response.statusCode,
-                  message: errorMsg
-                };
-                node.warn("msg w/resp: " + safeJSONStringify(node.msg));
-                node.error(errorMsg, node.msg);
-                break;
-              case 500: // bad credentials
-                RED.log.debug(
-                  "response (error 500): " + safeJSONStringify(response)
-                );
-                errorMsg = RED._("graphql.errors.badCreds");
-                node.status({ fill: "red", shape: "dot", text: errorMsg });
-                var longMsg = errorMsg;
-                if (response.body.response.message) {
-                  longMsg += ", " + response.body.response.message;
-                }
-                node.msg.payload.graphql = {
-                  statusCode: response.statusCode,
-                  errorCode: response.body.response.errorCode,
-                  message: longMsg
-                };
-                node.error(errorMsg, node.msg);
-                break;
-              default:
-                RED.log.debug("response: " + safeJSONStringify(response));
-                if (response) {
-                  node.warn("errorCode: " + response.statusCode);
-                  RED.log.debug("response.body: " + response.body);
-                  RED.log.debug(
-                    "type of response.body: " + typeof response.body
-                  );
-                  var responseJSON;
-                  try {
-                    responseJSON = JSON.parse(response.body);
-                    RED.log.debug(
-                      "responseJSON.response: " +
-                        safeJSONStringify(responseJSON.response)
-                    );
-                  } catch (e) {
-                    RED.log.error("error parsing response: " + response.body);
-                    responseJSON = null;
-                  }
-                  if (responseJSON && responseJSON.response.message) {
-                    node.error(
-                      "error message: " + responseJSON.response.message
-                    );
-                    node.status({
-                      fill: "red",
-                      shape: "dot",
-                      text: responseJSON.response.message
-                    });
-                  } else {
-                    var status = responseJSON ? responseJSON.statusCode : null;
-                    node.status({
-                      fill: "red",
-                      shape: "dot",
-                      text: RED._("graphql.status.failedConn") + status
-                    });
-                  }
-                } // if response
-                node.msg.payload.graphql = response;
-              //node.error('default error, msg: ' + safeJSONStringify(node.msg), node.msg);
-            } // switch
-          } else {
-            node.warn("Failed connecting to Graphql");
-            // The response object is null
-            switch (error.code) {
-              case "ENOTFOUND":
-                errorMsg = RED._("graphql.errors.server");
-                node.status({ fill: "red", shape: "dot", text: errorMsg });
-                node.error(errorMsg, node.msg);
-                break;
-              case "ETIMEDOUT":
-                errorMsg = RED._("graphql.errors.timeout");
-                node.status({ fill: "red", shape: "dot", text: errorMsg });
-                node.error(errorMsg, node.msg);
-                break;
-              default:
-                node.status({
-                  fill: "red",
-                  shape: "dot",
-                  text: RED._("graphql.status.failed") + " " + error.code
-                });
-                node.error("response empty, error: " + error, node.msg);
-            }
-          }
-        }
-      );
+      node.error("invalid graphql config");
     }
 
     function dataobject(context, msg){
@@ -362,10 +123,9 @@ module.exports = function(RED) {
       let data = dataobject(node.context(), node.msg);
       let url = mustache.render(node.graphqlConfig.endpoint, data);
       let headers = customHeaders
-      if (node.msg.authorization) {
-        headers["Authorization"] = node.msg.authorization
-      } else if (node.graphqlConfig.authorization) {
-        headers["Authorization"] = node.graphqlConfig.authorization
+      const token = node.token || node.graphqlConfig.token || "";
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
       }
 
       if (node.showDebug) {
@@ -373,11 +133,6 @@ module.exports = function(RED) {
         node.log(headers.Authorization);
       }
 
-      //RED.log.debug('callGraphQLServer, node: ' + safeJSONStringify(node));
-      // RED.log.debug('callGraphQLServer, node.graphqlConfig.endpoint: ' + node.graphqlConfig.endpoint);
-      // RED.log.debug('callGraphQLServer, query: ' + query);
-      // RED.log.debug('callGraphQLServer, headers: ' + JSON.stringify(headers));
-      // RED.log.debug('callGraphQLServer, variables: ' + JSON.stringify(variables));
       axios({
         method: "POST",
         url,
@@ -387,12 +142,8 @@ module.exports = function(RED) {
           query: query,
           variables: variables
         }
-        // withCredentials: useCredentials
       })
         .then(function(response) {
-          //RED.log.debug('response:' + safeJSONStringify(response, 1));
-          //RED.log.debug('response.data:' + safeJSONStringify(response.data));
-          //RED.log.debug('response.status:' + response.status);
           switch (true) {
             case response.status == 200 && !response.data.errors:
               node.status({
@@ -410,10 +161,6 @@ module.exports = function(RED) {
                   variables
                 }
               }
-              // delete node.msg.debugInfo.data.data // remove duplicate info
-              // node.msg.headers = headers
-              // node.msg.query = query
-              // node.msg.variables = variables
               node.send(node.msg);
               break;
             case response.status == 200 && !!response.data.errors:
@@ -448,9 +195,6 @@ module.exports = function(RED) {
         });
     }
 
-    //*********************************
-    // main function invoked on input
-    //*********************************
     node.on("input", function(msg) {
       RED.log.debug("--- on(input) ---");
       RED.log.debug("msg: " + safeJSONStringify(msg));
@@ -458,10 +202,6 @@ module.exports = function(RED) {
       node.template = msg.template || node.template;
       node.syntax = msg.syntax || node.syntax;
       node.customHeaders = {...node.customHeaders, ...msg.customHeaders}
-      //RED.log.trace('node: ' + safeJSONStringify(node));
-      // RED.log.debug('node: ' + safeJSONStringify(node));
-      //RED.log.trace('config: ' + safeJSONStringify(config));
-      //RED.log.debug('config.query: ' + config.query);
       var query;
       if (node.syntax === "mustache") {
         query = mustache.render(node.template, msg);
@@ -470,32 +210,22 @@ module.exports = function(RED) {
       }
       var variables = msg[node.varsField] || {}
 
-      // Do we have a serviceTicket (in other words, have we successfully logged in)
-      if (!config.token) {
-        // no token so we're talking to a server that doesn't require a login
-        callGraphQLServer(query, variables, node.customHeaders);
-      } else if (!node.graphqlConfig.credentials.serviceTicket) {
-        RED.log.debug("No ticket, but we have a token so try to login");
-        doLogin(); // do the login
-      } else {
-        // we have a ticket
-        callGraphQLServer(query, variables, node.customHeaders);
-      }
+      callGraphQLServer(query, variables, node.customHeaders);
     });
 
     node.on("close", function() {
       RED.log.debug("--- closing node ---");
-      //RED.log.debug('node: ' + safeJSONStringify(node));
-      //RED.log.trace('config: ' + safeJSONStringify(config));
-      //RED.log.debug('pre credentials: ' + safeJSONStringify(node.graphqlConfig.credentials));
-      node.graphqlConfig.credentials.serviceTicket = ""; // store service ticket
+      node.graphqlConfig.credentials.token = node.token || "";
       RED.nodes.addCredentials(
         node.graphqlConfig,
         node.graphqlConfig.credentials
       );
-      //RED.log.debug('post credentials: ' + safeJSONStringify(node.graphqlConfig.credentials))
     });
   }
 
-  RED.nodes.registerType("graphql", GraphqlExecNode);
+  RED.nodes.registerType("graphql", GraphqlExecNode, {
+    credentials: {
+      token: { type: "password" },
+    }
+  });
 };
