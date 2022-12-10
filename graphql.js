@@ -73,38 +73,47 @@ module.exports = function(RED) {
     RED.log.debug("GraphqlNode node: " + safeJSONStringify(node));
     RED.log.trace("GraphqlNode config: " + safeJSONStringify(config));
     node.endpoint = config.endpoint;
-    node.authorization = config.authorization
+    node.token = config.token
+    // node.token = this.credentials.token
+    // if (node.credentials) {
+    //   node.token = node.credentials.token;
+    // }
     RED.log.debug("node.endpoint: " + node.endpoint);
-    RED.log.debug("node.authorization: " + node.authorization)
+    RED.log.debug("node.token: " + node.token)
+
+
+    node.on("close", function() {
+      node.graphqlConfig.credentials.token = config.token || "";
+      RED.nodes.addCredentials(
+        node.graphqlConfig,
+        node.graphqlConfig.credentials
+      );
+    });
   }
 
   RED.nodes.registerType("graphql-server", GraphqlNode, {
     credentials: {
-      user: { type: "text" },
-      password: { type: "password" },
-      serviceTicket: { type: "password" },
-      authorization: { type: "password" },
+      token: { type: "password" },
     }
   });
 
   function GraphqlExecNode(config) {
     RED.nodes.createNode(this, config);
-    this.query = config.query;
+    var node = this;
+    // Retrieve the config node
+    node.graphqlConfig = RED.nodes.getNode(config.graphql);
+
     this.template = config.template;
     this.name = config.name;
     this.varsField = config.varsField || "variables";
     this.syntax = config.syntax || "mustache";
     this.showDebug = config.showDebug || false
+    // this.token = config.token || "";
+    this.token = this.credentials.token || "";
     this.customHeaders = config.customHeaders || {}
-    var node = this;
     RED.log.debug("--- GraphqlExecNode ---");
     //RED.log.debug('GraphqlExecNode node: ' + safeJSONStringify(node));
     //RED.log.trace('GraphqlExecNode config: ' + safeJSONStringify(config));
-
-    // Retrieve the config node
-    node.graphqlConfig = RED.nodes.getNode(config.graphql);
-    var credentials = RED.nodes.getCredentials(config.graphql);
-    RED.log.trace("credentials: " + safeJSONStringify(credentials));
 
     if (!node.graphqlConfig) {
       this.error("invalid graphql config");
@@ -362,10 +371,9 @@ module.exports = function(RED) {
       let data = dataobject(node.context(), node.msg);
       let url = mustache.render(node.graphqlConfig.endpoint, data);
       let headers = customHeaders
-      if (node.msg.authorization) {
-        headers["Authorization"] = node.msg.authorization
-      } else if (node.graphqlConfig.authorization) {
-        headers["Authorization"] = node.graphqlConfig.authorization
+      const token = node.token || node.graphqlConfig.token || "";
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
       }
 
       if (node.showDebug) {
@@ -470,17 +478,7 @@ module.exports = function(RED) {
       }
       var variables = msg[node.varsField] || {}
 
-      // Do we have a serviceTicket (in other words, have we successfully logged in)
-      if (!config.token) {
-        // no token so we're talking to a server that doesn't require a login
-        callGraphQLServer(query, variables, node.customHeaders);
-      } else if (!node.graphqlConfig.credentials.serviceTicket) {
-        RED.log.debug("No ticket, but we have a token so try to login");
-        doLogin(); // do the login
-      } else {
-        // we have a ticket
-        callGraphQLServer(query, variables, node.customHeaders);
-      }
+      callGraphQLServer(query, variables, node.customHeaders);
     });
 
     node.on("close", function() {
@@ -488,14 +486,17 @@ module.exports = function(RED) {
       //RED.log.debug('node: ' + safeJSONStringify(node));
       //RED.log.trace('config: ' + safeJSONStringify(config));
       //RED.log.debug('pre credentials: ' + safeJSONStringify(node.graphqlConfig.credentials));
-      node.graphqlConfig.credentials.serviceTicket = ""; // store service ticket
+      node.graphqlConfig.credentials.token = node.token || "";
       RED.nodes.addCredentials(
         node.graphqlConfig,
         node.graphqlConfig.credentials
       );
-      //RED.log.debug('post credentials: ' + safeJSONStringify(node.graphqlConfig.credentials))
     });
   }
 
-  RED.nodes.registerType("graphql", GraphqlExecNode);
+  RED.nodes.registerType("graphql", GraphqlExecNode, {
+    credentials: {
+      token: { type: "password" },
+    }
+  });
 };

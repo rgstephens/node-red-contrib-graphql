@@ -8,8 +8,8 @@
         <input type="text" id="node-config-input-endpoint">
     </div>
     <div class="form-row">
-        <label for="node-config-input-authorization"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.authorization"></span></label>
-        <input type="text" id="node-config-input-authorization">
+        <label for="node-config-input-token"><i class="fa fa-lock"></i> <span data-i18n="graphql.label.token"></span></label>
+        <input type="text" id="node-config-input-token">
     </div>
 </script>
 
@@ -20,16 +20,10 @@
         defaults: {
             name: { value: "", required: false },
             endpoint: { value: "", required: true },
-            token: { value: "", required: false },
-            user: { value: "", required: false },
-            password: { value: "", required: false }
+            token: { value: "", required: false }
         },
         credentials: {
-            user: { type: "text" },
-            password: { type: "password" },
-            serviceTicket: { type: "password" },
             token: { type: "password" },
-            authorization: { type: "password" },  
         },
         credentials: {},
         align: 'left',
@@ -45,7 +39,7 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-row">
-        <label for="node-input-graphql"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.endpoint"></span></label>
+        <label for="node-input-graphql"><i class="fa fa-globe"></i> <span data-i18n="graphql.label.endpoint"></span></label>
         <input type="text" id="node-input-graphql">
     </div>
     <!-- <div class="form-row">
@@ -77,22 +71,16 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-token"><i class="fa fa-lock"></i> <span data-i18n="graphql.label.token"></span></label>
+        <input type="text" id="node-input-token">
+    </div>
+    <div class="form-row">
         <label for="node-input-showDebug"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.showDebug"></span></label>
         <input type="checkbox" id="node-input-showDebug">
     </div>
 </script>
 
 <script type="text/javascript">
-
-    function oneditprepare() {
-        $("#node-input-collection").change(function () {
-            if ($("#node-input-collection").val() === "") {
-                $("#node-warning").show();
-            } else {
-                $("#node-warning").hide();
-            }
-        });
-    }
 
     RED.nodes.registerType('graphql', {
         category: 'function',
@@ -101,10 +89,14 @@
             name: { value: "", required: true },
             graphql: { type: "graphql-server", required: true },
             format: { value: "handlebars", required: false },
+            template: { value: "{\n  country(code: \"NL\") {\n    name\n    native\n    capital\n  }\n}", required: true },
             syntax: { value: "mustache", required: false },
-            template: { value: "{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true },
+            token: { value: "", required: false },
             showDebug: {value: false, required: false}
             // customHeaders:{value:"{}", required: false}
+        },
+        credentials: {
+            token: { type: "password" },
         },
         inputs: 1,
         outputs: 2,
@@ -125,14 +117,12 @@
                 this.syntax = 'mustache';
                 $("#node-input-syntax").val(this.syntax);
             }
-            $("#node-input-field").typedInput({
-                default: 'msg',
-                types: ['msg', 'flow', 'global'],
-                typeField: $("#node-input-fieldType")
-            });
             if (!this.showDebug) {
                 // this.showDebug = false;
                 $("#node-input-showDebug").val(this.showDebug);
+            }
+            if (!this.token) {
+                $("#node-input-token").val(this.token);
             }
 
             // $("#node-input-customHeaders").typedInput({
@@ -166,6 +156,7 @@
             $("#node-input-template").val(this.editor.getValue())
             delete this.editor;
             $("#node-input-showDebug").val(this.showDebug.getValue())
+            $("#node-input-token").val(this.token.getValue())
         },
         oneditresize: function (size) {
             var rows = $("#dialog-form>div:not(.node-text-editor-row)");
