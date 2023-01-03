@@ -151,7 +151,6 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
-              node.msg.payload = {}
               node.msg.payload.graphql = response.data.data; // remove .data to see entire response
               if (node.showDebug){
                 node.msg.debugInfo = {
