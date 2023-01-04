@@ -11,7 +11,7 @@ A NodeRed node to execute GraphQL Queries.
 
 | Vers  | Changes       |
 | ----- | -------------------------------------------------------- |
-| 2.1.1 | Fix payload init issue |
+| 2.1.2 | Fix payload init issue |
 | 2.1.0 | Bearer Token Authentication |
 | 2.0.1 | Update dependencies (`axios` & `mustache`), fix node-red scorecard issues |
 | 2.0.0 | GraphQL response is now on `payload.graphql` instead of replacing `payload`. This is a breaking change. Addresses #32 |
