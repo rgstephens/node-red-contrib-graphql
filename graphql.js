@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
   // https://github.com/axios/axios
   var axios = require("axios");
   var mustache = require("mustache");
@@ -6,7 +6,11 @@ module.exports = function(RED) {
   var vers = "2.1.2";
 
   function isReadable(value) {
-    return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
+    return (
+      typeof value === "object" &&
+      typeof value._read === "function" &&
+      typeof value._readableState === "object"
+    );
   }
 
   function safeJSONStringify(input, maxDepth) {
@@ -72,30 +76,30 @@ module.exports = function(RED) {
     RED.log.debug("GraphqlNode node: " + safeJSONStringify(node));
     RED.log.trace("GraphqlNode config: " + safeJSONStringify(config));
     node.endpoint = config.endpoint;
-    node.token = config.token
+    node.token = config.token;
     RED.log.debug("node.endpoint: " + node.endpoint);
-    RED.log.debug("node.token: " + node.token)
+    RED.log.debug("node.token: " + node.token);
   }
 
   RED.nodes.registerType("graphql-server", GraphqlNode, {
     credentials: {
       token: { type: "password" },
-    }
+    },
   });
 
   function GraphqlExecNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    node.graphqlConfig = RED.nodes.getNode(config.graphql);  // Retrieve the config node
+    node.graphqlConfig = RED.nodes.getNode(config.graphql); // Retrieve the config node
 
     node.template = config.template;
     node.name = config.name;
     node.varsField = config.varsField || "variables";
     node.syntax = config.syntax || "mustache";
-    node.showDebug = config.showDebug || false
+    node.showDebug = config.showDebug || false;
     node.token = node.credentials.token || "";
-    node.customHeaders = config.customHeaders || {}
+    node.customHeaders = config.customHeaders || {};
     node.varsField = config.varsField || "variables";
     RED.log.debug("--- GraphqlExecNode ---");
 
@@ -103,29 +107,29 @@ module.exports = function(RED) {
       node.error("invalid graphql config");
     }
 
-    function dataobject(context, msg){
-      data = {}
+    function dataobject(context, msg) {
+      data = {};
       data.msg = msg;
       data.global = {};
       data.flow = {};
       g_keys = context.global.keys();
       f_keys = context.flow.keys();
-      for (k in g_keys){
+      for (k in g_keys) {
         data.global[g_keys[k]] = context.global.get(g_keys[k]);
-      };
-      for (k in f_keys){
+      }
+      for (k in f_keys) {
         data.flow[f_keys[k]] = context.flow.get(f_keys[k]);
-      };
-      return data
+      }
+      return data;
     }
 
     function callGraphQLServer(query, variables = {}, customHeaders = {}) {
       let data = dataobject(node.context(), node.msg);
       let url = mustache.render(node.graphqlConfig.endpoint, data);
-      let headers = customHeaders
+      let headers = customHeaders;
       const token = node.token || node.graphqlConfig.token || "";
       if (token) {
-        headers["Authorization"] = `Bearer ${token}`
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       if (node.showDebug) {
@@ -140,26 +144,27 @@ module.exports = function(RED) {
         timeout: 20000,
         data: {
           query: query,
-          variables: variables
-        }
+          variables: variables,
+        },
       })
-        .then(function(response) {
+        .then(function (response) {
+          if (!node.msg.payload) node.msg.payload = {};
           switch (true) {
             case response.status == 200 && !response.data.errors:
               node.status({
                 fill: "green",
                 shape: "dot",
-                text: RED._("graphql.status.success")
+                text: RED._("graphql.status.success"),
               });
               if (!node.msg.payload) node.msg.payload = {};
               node.msg.payload.graphql = response.data.data; // remove .data to see entire response
-              if (node.showDebug){
+              if (node.showDebug) {
                 node.msg.debugInfo = {
                   data: response.data,
                   headers,
                   query,
-                  variables
-                }
+                  variables,
+                };
               }
               node.send(node.msg);
               break;
@@ -167,7 +172,7 @@ module.exports = function(RED) {
               node.status({
                 fill: "yellow",
                 shape: "dot",
-                text: RED._("graphql.status.gqlError")
+                text: RED._("graphql.status.gqlError"),
               });
               node.msg.payload.graphql = response.data.errors;
               node.send([null, node.msg]);
@@ -176,17 +181,17 @@ module.exports = function(RED) {
               node.status({
                 fill: "red",
                 shape: "dot",
-                text: "status: " + response.status
+                text: "status: " + response.status,
               });
               node.msg.payload.graphql = {
                 statusCode: response.status,
-                body: response.data
+                body: response.data,
               };
               node.send([null, node.msg]);
               break;
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           RED.log.debug("error:" + error);
           node.status({ fill: "red", shape: "dot", text: "error" });
           node.msg.payload.graphql = { error };
@@ -195,25 +200,25 @@ module.exports = function(RED) {
         });
     }
 
-    node.on("input", function(msg) {
+    node.on("input", function (msg) {
       RED.log.debug("--- on(input) ---");
       RED.log.debug("msg: " + safeJSONStringify(msg));
-      node.msg = msg;
+      node.msg = RED.util.cloneMessage(msg);
       node.template = msg.template || node.template;
       node.syntax = msg.syntax || node.syntax;
-      node.customHeaders = {...node.customHeaders, ...msg.customHeaders}
+      node.customHeaders = { ...node.customHeaders, ...msg.customHeaders };
       var query;
       if (node.syntax === "mustache") {
         query = mustache.render(node.template, msg);
       } else {
         query = node.template;
       }
-      var variables = msg[node.varsField] || {}
+      var variables = msg[node.varsField] || {};
 
       callGraphQLServer(query, variables, node.customHeaders);
     });
 
-    node.on("close", function() {
+    node.on("close", function () {
       RED.log.debug("--- closing node ---");
       node.graphqlConfig.credentials.token = node.token || "";
       RED.nodes.addCredentials(
@@ -226,6 +231,6 @@ module.exports = function(RED) {
   RED.nodes.registerType("graphql", GraphqlExecNode, {
     credentials: {
       token: { type: "password" },
-    }
+    },
   });
 };
