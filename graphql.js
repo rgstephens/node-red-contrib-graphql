@@ -202,7 +202,7 @@ module.exports = function (RED) {
     node.on("input", function (msg) {
       RED.log.debug("--- on(input) ---");
       RED.log.debug("msg: " + safeJSONStringify(msg));
-      node.msg = msg;
+      node.msg = RED.util.cloneMessage(msg);
       node.template = msg.template || node.template;
       node.syntax = msg.syntax || node.syntax;
       node.customHeaders = { ...node.customHeaders, ...msg.customHeaders };
