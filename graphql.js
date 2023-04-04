@@ -148,6 +148,7 @@ module.exports = function (RED) {
         },
       })
         .then(function (response) {
+          if (!node.msg.payload) node.msg.payload = {};
           switch (true) {
             case response.status == 200 && !response.data.errors:
               node.status({
