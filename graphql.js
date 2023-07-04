@@ -144,6 +144,7 @@ module.exports = function(RED) {
         }
       })
         .then(function(response) {
+          if (!node.msg.payload) node.msg.payload = {};
           switch (true) {
             case response.status == 200 && !response.data.errors:
               node.status({
@@ -151,7 +152,6 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
-              if (!node.msg.payload) node.msg.payload = {};
               node.msg.payload.graphql = response.data.data; // remove .data to see entire response
               if (node.showDebug){
                 node.msg.debugInfo = {
@@ -189,6 +189,7 @@ module.exports = function(RED) {
         .catch(function(error) {
           RED.log.debug("error:" + error);
           node.status({ fill: "red", shape: "dot", text: "error" });
+          if (!node.msg.payload) node.msg.payload = {};
           node.msg.payload.graphql = { error };
           node.error("error: " + error);
           node.send([null, node.msg]);
