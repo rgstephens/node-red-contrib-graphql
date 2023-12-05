@@ -2,8 +2,9 @@ module.exports = function(RED) {
   // https://github.com/axios/axios
   var axios = require("axios");
   var mustache = require("mustache");
+  var isPlainObject = require("lodash.isplainobject");
 
-  var vers = "2.1.2";
+  var vers = "2.1.3";
 
   function isReadable(value) {
     return typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object'
@@ -151,7 +152,7 @@ module.exports = function(RED) {
                 shape: "dot",
                 text: RED._("graphql.status.success")
               });
-              if (!node.msg.payload) node.msg.payload = {};
+              if (!isPlainObject(node.msg.payload)) node.msg.payload = {};
               node.msg.payload.graphql = response.data.data; // remove .data to see entire response
               if (node.showDebug){
                 node.msg.debugInfo = {
@@ -189,6 +190,7 @@ module.exports = function(RED) {
         .catch(function(error) {
           RED.log.debug("error:" + error);
           node.status({ fill: "red", shape: "dot", text: "error" });
+          if (!isPlainObject(node.msg.payload)) node.msg.payload = {};
           node.msg.payload.graphql = { error };
           node.error("error: " + error);
           node.send([null, node.msg]);
